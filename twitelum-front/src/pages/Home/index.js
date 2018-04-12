@@ -7,8 +7,8 @@ import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
 
 class Home extends Component {
-    constructor() {
-        super()
+    constructor(props) {
+        super(props)
         this.state = {
             novoTweet: '',
             tweets: []
@@ -16,6 +16,10 @@ class Home extends Component {
         this.handleChange = this.handleChange.bind(this)
         this.handleButton = this.handleButton.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
+
+        // if(!localStorage.getItem('TOKEN')){
+        //     this.props.history.push('/login')
+        // }
     }
 
     handleChange(event) {
@@ -84,7 +88,12 @@ class Home extends Component {
                     <Dashboard posicao="centro">
                         <Widget>
                             <div className="tweetsArea">
-                                {this.state.tweets.map((tweet, index) => {
+                                
+                                { this.state.tweets === '' && 
+                                    <div> Escreva um Tweet ! </div>
+                                }
+
+                                {this.state.tweets && this.state.tweets.map((tweet, index) => {
                                     return <Tweet key={tweet + index} texto={tweet}/>
                                 })}
                                 

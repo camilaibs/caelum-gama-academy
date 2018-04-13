@@ -30,5 +30,13 @@
         "foto": "https://www.caelum.com.br/imagens/instrutores/fotos/vanessa-tonini-120.jpg",
         "email": "vanessa.tonini@caelum.com.br",
         "senha": "123456"
+    },
+    {
+        "login": "daninaomi",
+        "nome": "Danielle",
+        "sobrenome": "Nakatsu",
+        "foto": "https://avatars2.githubusercontent.com/u/32687551?s=460&v=4",
+        "email": "daninaomi93@gmail.com",
+        "senha": "123456"
     }
 ]

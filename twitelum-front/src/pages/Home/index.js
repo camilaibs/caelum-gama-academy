@@ -11,20 +11,43 @@ class Home extends Component {
         super(props)
         this.state = {
             novoTweet: '',
-            tweets: []
+            tweets: [],
+            error: '',
+            login: '',
+            token: localStorage.getItem('TOKEN'),
+            login: localStorage.getItem('LOGIN') 
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleButton = this.handleButton.bind(this)
         this.handleSubmit = this.handleSubmit.bind(this)
 
-        // if(!localStorage.getItem('TOKEN')){
-        //     this.props.history.push('/login')
-        // }
+    }
+
+    componentDidMount() {
+        // fetch('http://localhost:3001/tweets')
+        fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`)
+            .then((resposta) => resposta.json())
+            .then((tweetsExistentes) => {
+
+                this.setState({
+                    tweets: tweetsExistentes,
+                    // login: localStorage.getItem('LOGIN')
+                })
+            })
+
+        // fetch(`http://localhost:3001/usuarios/omariosouto`)
+        //     .then((resposta) => resposta.json())
+        //     .then((usuarios) => {
+
+        //         this.setState({
+        //             // login: localStorage.getItem('LOGIN')
+        //         })
+        //     })
     }
 
     handleChange(event) {
         // this.setState(event.target.value)
-        this.setState({novoTweet: event.target.value})
+        this.setState({ novoTweet: event.target.value })
     }
 
     handleButton() {
@@ -40,20 +63,43 @@ class Home extends Component {
 
         const novoTweet = this.state.novoTweet
         const tweetsVelhos = this.state.tweets
+        
 
         if (novoTweet) {
-            this.setState({
-                tweets: [novoTweet, ...tweetsVelhos]
+            fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`, {
+                method: 'POST',
+                body: JSON.stringify({ conteudo: novoTweet })
             })
+                .then((resposta) => {
+                    if (!resposta.ok) {
+                        throw resposta
+                    }
+                    return resposta.json()
+                })
+                .then((tweetServer) => {
+                    // console.log(tweetServer)
+                    this.setState({
+                        tweets: [tweetServer, ...tweetsVelhos]
+                    })
+                })
+                .catch((erro) => {
+                    erro.json().then((response) => {
+                        // console.log(response)
+                        this.setState({
+                            error: "Não encontrou tweets"
+                        })
+                    })
+                })
         }
-        
+
     }
+
 
     render() {
         return (
             <Fragment>
                 <Cabecalho>
-                    <NavMenu usuario="@omariosouto" />
+                    <NavMenu usuario={`@ ${this.state.login}`} />
                 </Cabecalho>
                 <div className="container">
                     <Dashboard>
@@ -88,15 +134,27 @@ class Home extends Component {
                     <Dashboard posicao="centro">
                         <Widget>
                             <div className="tweetsArea">
-                                
-                                { this.state.tweets === '' && 
+
+                                {/* { this.state.tweets === '' && 
                                     <div> Escreva um Tweet ! </div>
+                                } */}
+                                {this.state.tweets.length === 0 ?
+                                    <div> Escreva um Tweet ! </div> : ''
                                 }
 
                                 {this.state.tweets && this.state.tweets.map((tweet, index) => {
-                                    return <Tweet key={tweet + index} texto={tweet}/>
+                                    return <Tweet
+                                        key={tweet._id}
+                                        texto={tweet.conteudo}
+                                        tweetInfo={tweet} />
                                 })}
-                                
+
+                                {this.state.error &&
+                                    <div className="loginPage__errorBox">
+                                        {this.state.error}
+                                    </div>
+                                }
+
                             </div>
                         </Widget>
                     </Dashboard>

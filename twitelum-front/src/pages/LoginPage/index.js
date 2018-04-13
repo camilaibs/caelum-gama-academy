@@ -5,12 +5,12 @@ import './loginPage.css'
 
 
 class LoginPage extends Component {
-    // constructor() {
-    //     super()
-    //     this.state = {
-    //         error: ''
-    //     }
-    // }
+    constructor() {
+        super()
+        this.state = {
+            error: ''
+        }
+    }
 
     fazLogin = event => {
         event.preventDefault()
@@ -35,11 +35,15 @@ class LoginPage extends Component {
         .then((respostaPronta) => {
             console.log(respostaPronta.token)
             localStorage.setItem('TOKEN', respostaPronta.token)
+            localStorage.setItem('LOGIN', this.inputLogin.value)
             this.props.history.push('/')
         })
         .catch((erro) => {
             erro.json().then((response) => {
-                console.log(response)
+                // console.log(response)
+                this.setState({
+                    error: "Login ou senha inválidos"
+                })
             })
         })
     }
@@ -70,9 +74,11 @@ class LoginPage extends Component {
                                 ref={ (inputSenhaDoDOM) => this.inputSenha = inputSenhaDoDOM } />
                             </div>
 
-                            <div className="loginPage__errorBox">
-                                {/* {this.state.error} */}
-                            </div> 
+                            {this.state.error &&
+                                <div className="loginPage__errorBox">
+                                    {this.state.error}
+                                </div> 
+                            }
 
                             <div className="loginPage__inputWrap">
                                 <button className="loginPage__btnLogin" type="submit">

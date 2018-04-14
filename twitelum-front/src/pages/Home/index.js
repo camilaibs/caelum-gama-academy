@@ -12,10 +12,13 @@ class Home extends Component {
         this.state = {
             novoTweet: '',
             tweets: [],
+            tweetAtivo: {
+                usuario: {}
+            },
             error: '',
             login: '',
             token: localStorage.getItem('TOKEN'),
-            login: localStorage.getItem('LOGIN') 
+            login: localStorage.getItem('LOGIN')
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleButton = this.handleButton.bind(this)
@@ -63,7 +66,7 @@ class Home extends Component {
 
         const novoTweet = this.state.novoTweet
         const tweetsVelhos = this.state.tweets
-        
+
 
         if (novoTweet) {
             fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`, {
@@ -92,6 +95,35 @@ class Home extends Component {
                 })
         }
 
+    }
+
+    removeTweet = (idTweet) => {
+
+        fetch(`http://localhost:3001/tweets/${idTweet}?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`, {
+            method: 'DELETE'
+        })
+            .then(respostaServer => respostaServer.json())
+            .then(respostaPronta => {
+                const tweetsAtualizados = this.state.tweets.filter(tweetAtual => {
+                    return tweetAtual._id !== idTweet
+                })
+
+                this.setState({
+                    tweets: tweetsAtualizados
+                })
+            })
+
+    }
+
+    abreModal = (idTweetModal) => {
+
+        const tweetAtivo = this.state.tweets.find((tweetAtual) => {
+            return tweetAtual._id === idTweetModal
+        })
+
+        this.setState({
+            tweetAtivo: tweetAtivo
+        })
     }
 
 
@@ -142,9 +174,11 @@ class Home extends Component {
                                     <div> Escreva um Tweet ! </div> : ''
                                 }
 
-                                {this.state.tweets && this.state.tweets.map((tweet, index) => {
+                                {this.state.tweets.length && this.state.tweets.map((tweet, index) => {
                                     return <Tweet
                                         key={tweet._id}
+                                        removeHandler={() => this.removeTweet(tweet._id)}
+                                        handleModal={() => this.abreModal(tweet._id)}
                                         texto={tweet.conteudo}
                                         tweetInfo={tweet} />
                                 })}
@@ -159,6 +193,14 @@ class Home extends Component {
                         </Widget>
                     </Dashboard>
                 </div>
+
+                {this.state.tweetAtivo._id &&
+                    <Tweet
+                        removeHandler={() => this.removeTweet(this.state.tweetAtivo._id)}
+                        texto={this.state.tweetAtivo.conteudo}
+                        tweetInfo={this.state.tweetAtivo} />
+                }
+
             </Fragment>
         );
     }

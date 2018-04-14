@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import './tweet.css'
+
 
 class Tweet extends Component {
     constructor(props) {
@@ -9,10 +11,28 @@ class Tweet extends Component {
             totalLikes: props.tweetInfo.totalLikes
         }
     }
-    
+
+    handleLike = (idTweet) => {
+        const { likeado, totalLikes } = this.state
+
+        this.setState({
+            likeado: !likeado,
+            totalLikes: likeado ? totalLikes - 1 : totalLikes + 1
+        })
+
+        fetch(`http://localhost:3001/tweets/${idTweet}/like?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`, {
+            method: 'POST'
+        })
+            .then(respostaServer => respostaServer.json())
+
+            .then((respostaPronta) => {
+                console.log(respostaPronta)
+            })
+    }
+
     render() {
         return (
-            <article className="tweet">
+            <article className="tweet" onClick={(event) => this.props.handleModal(this.props.tweetInfo._id)}>
                 <div className="tweet__cabecalho">
                     {/* <img className="tweet__fotoUsuario" src="https://placehold.it/50x50" alt="" />
                     <span className="tweet__nomeUsuario">Fulano de Tal</span>
@@ -26,13 +46,14 @@ class Tweet extends Component {
                     {this.props.texto}
                 </p>
                 <footer className="tweet__footer">
-                    <button className="btn btn--clean">
-                        <svg 
-                        className={`icon icon--small iconHeart 
+
+                    <button className="btnTweet btn btn--clean" onClick={(event) => this.handleLike(this.props.tweetInfo._id) }>
+                        <svg
+                            className={`icon icon--small iconHeart 
                         ${ this.state.likeado ? 'iconHeart--active' : ''}
-                        `} 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 47.5 47.5">
+                        `}
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 47.5 47.5">
                             <defs>
                                 <clipPath id="a">
                                     <path d="M0 38h38V0H0v38z"></path>
@@ -44,10 +65,34 @@ class Tweet extends Component {
                         </svg>
                         {this.state.totalLikes}
                     </button>
+
+                    {this.props.tweetInfo.removivel &&
+                        <button
+                            className="btn btn--blue btn--remove"
+                            onClick={this.props.removeHandler}>
+                            x
+                        </button>
+                    }
                 </footer>
             </article>
         )
     }
+}
+
+Tweet.propTypes = {
+    removeHandler: PropTypes.func.isRequired,
+    texto: PropTypes.string.isRequired,
+    tweetInfo: PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        likeado: PropTypes.bool.isRequired,
+        totalLikes: PropTypes.number.isRequired,
+        removivel: PropTypes.bool,
+        usuario: PropTypes.shape({
+            foto: PropTypes.string.isRequired,
+            login: PropTypes.string.isRequired,
+            nome: PropTypes.string.isRequired
+        }).isRequired
+    }).isRequired
 }
 
 export default Tweet

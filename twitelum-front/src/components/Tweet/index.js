@@ -32,11 +32,9 @@ class Tweet extends Component {
 
     render() {
         return (
-            <article className="tweet" onClick={(event) => this.props.handleModal(this.props.tweetInfo._id)}>
-                <div className="tweet__cabecalho">
-                    {/* <img className="tweet__fotoUsuario" src="https://placehold.it/50x50" alt="" />
-                    <span className="tweet__nomeUsuario">Fulano de Tal</span>
-                    <a href=""><span className="tweet__userName">@usuario</span></a> */}
+            <article className="tweet" onClick={this.props.handleModal}>
+                <div className="tweet__cabecalho ignoraModal">
+                   
                     <img className="tweet__fotoUsuario" src={this.props.tweetInfo.usuario.foto} alt="" />
                     <span className="tweet__nomeUsuario">{this.props.tweetInfo.usuario.nome}</span>
                     <a href=""><span className="tweet__userName">@{this.props.tweetInfo.usuario.login}</span></a>
@@ -45,7 +43,7 @@ class Tweet extends Component {
                     {/* <span>Lorem, ipsum dolor sit <a href="/trends/#amet" data-reactroot="">#amet</a> consectetur adipisicing <a href="/trends/#elit" data-reactroot="">#elit</a>. Adipisci ut cumque tempora? Quam velit vitae voluptatum tempora iste, mollitia, sa</span> */}
                     {this.props.texto}
                 </p>
-                <footer className="tweet__footer">
+                <footer className="tweet__footer ignoraModal">
 
                     <button className="btnTweet btn btn--clean" onClick={(event) => this.handleLike(this.props.tweetInfo._id) }>
                         <svg

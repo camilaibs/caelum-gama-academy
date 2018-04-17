@@ -1,12 +1,21 @@
 import React, { Component, Fragment } from 'react';
+
 import Cabecalho from '../../components/Cabecalho'
 import NavMenu from '../../components/NavMenu'
 import Dashboard from '../../components/Dashboard'
 import Widget from '../../components/Widget'
 import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
+import Modal from '../../components/Modal'
+
+import PropTypes from 'prop-types'
+
 
 class Home extends Component {
+    static contextTypes = {
+        store: PropTypes.object.isRequired
+    }
+
     constructor(props) {
         super(props)
         this.state = {
@@ -26,16 +35,29 @@ class Home extends Component {
 
     }
 
+    componentWillMount() {
+        // window.store.subscribe(() => {
+        this.context.store.subscribe(() => {
+            this.setState({
+                tweets: this.context.store.getState()
+            })
+        })
+    }
+
     componentDidMount() {
-        // fetch('http://localhost:3001/tweets')
         fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`)
             .then((resposta) => resposta.json())
             .then((tweetsExistentes) => {
 
-                this.setState({
-                    tweets: tweetsExistentes,
-                    // login: localStorage.getItem('LOGIN')
+                this.context.store.dispatch({
+                    type: 'CARREGA_TWEETS',
+                    tweets: tweetsExistentes
                 })
+
+                // this.setState({
+                //     tweets: tweetsExistentes,
+                //     // login: localStorage.getItem('LOGIN')
+                // })
             })
 
         // fetch(`http://localhost:3001/usuarios/omariosouto`)
@@ -49,7 +71,6 @@ class Home extends Component {
     }
 
     handleChange(event) {
-        // this.setState(event.target.value)
         this.setState({ novoTweet: event.target.value })
     }
 
@@ -80,14 +101,14 @@ class Home extends Component {
                     return resposta.json()
                 })
                 .then((tweetServer) => {
-                    // console.log(tweetServer)
+                    
                     this.setState({
                         tweets: [tweetServer, ...tweetsVelhos]
                     })
                 })
                 .catch((erro) => {
                     erro.json().then((response) => {
-                        // console.log(response)
+
                         this.setState({
                             error: "Não encontrou tweets"
                         })
@@ -109,21 +130,37 @@ class Home extends Component {
                 })
 
                 this.setState({
-                    tweets: tweetsAtualizados
+                    tweets: tweetsAtualizados,
+                    tweetAtivo: {}
                 })
             })
 
     }
 
-    abreModal = (idTweetModal) => {
+    abreModal = (idTweetModal, event) => {
+        // const ignoraModal = event.target.classList.contains('ignoraModal')
+        const ignoraModal = event.target.closest('.ignoraModal')
 
-        const tweetAtivo = this.state.tweets.find((tweetAtual) => {
-            return tweetAtual._id === idTweetModal
-        })
+        if (!ignoraModal) {
+            const tweetAtivo = this.state.tweets.find((tweetAtual) => {
 
-        this.setState({
-            tweetAtivo: tweetAtivo
-        })
+                return tweetAtual._id === idTweetModal
+            })
+    
+            this.setState({
+                tweetAtivo: tweetAtivo
+            })
+        }        
+    }
+
+    fechaModal = (event) => {
+        const isModal = event.target.classList.contains('modal')
+
+        if (isModal) {
+            this.setState({
+                tweetAtivo: {}
+            })
+        }
     }
 
 
@@ -167,7 +204,7 @@ class Home extends Component {
                         <Widget>
                             <div className="tweetsArea">
 
-                                {/* { this.state.tweets === '' && 
+                                {/* { this.state.tweets === '' && ----------- meio errado
                                     <div> Escreva um Tweet ! </div>
                                 } */}
                                 {this.state.tweets.length === 0 ?
@@ -178,7 +215,7 @@ class Home extends Component {
                                     return <Tweet
                                         key={tweet._id}
                                         removeHandler={() => this.removeTweet(tweet._id)}
-                                        handleModal={() => this.abreModal(tweet._id)}
+                                        handleModal={(event) => this.abreModal(tweet._id, event)}
                                         texto={tweet.conteudo}
                                         tweetInfo={tweet} />
                                 })}
@@ -194,16 +231,24 @@ class Home extends Component {
                     </Dashboard>
                 </div>
 
-                {this.state.tweetAtivo._id &&
-                    <Tweet
-                        removeHandler={() => this.removeTweet(this.state.tweetAtivo._id)}
-                        texto={this.state.tweetAtivo.conteudo}
-                        tweetInfo={this.state.tweetAtivo} />
-                }
+                <Modal 
+                    isAberto={this.state.tweetAtivo._id}
+                    fechaModal={this.fechaModal}>
+                    <Widget>
+                        <Tweet
+                            removeHandler={() => this.removeTweet(this.state.tweetAtivo._id)}
+                            texto={this.state.tweetAtivo.conteudo || ''}
+                            tweetInfo={this.state.tweetAtivo} />
+                    </Widget>
+                </Modal>
 
             </Fragment>
         );
     }
 }
+
+// Home.contextTypes = {
+//     store: PropTypes.object.isRequired
+// }
 
 export default Home;

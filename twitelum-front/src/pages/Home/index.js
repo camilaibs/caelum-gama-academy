@@ -5,11 +5,12 @@ import NavMenu from '../../components/NavMenu'
 import Dashboard from '../../components/Dashboard'
 import Widget from '../../components/Widget'
 import TrendsArea from '../../components/TrendsArea'
-import Tweet from '../../components/Tweet'
+// import Tweet from '../../components/Tweet'
+import Tweet from '../../containers/tweetPadrao'
 import Modal from '../../components/Modal'
 
 import PropTypes from 'prop-types'
-
+import * as TweetsAPI from '../../apis/tweetsAPI'
 
 class Home extends Component {
     static contextTypes = {
@@ -26,18 +27,19 @@ class Home extends Component {
             },
             error: '',
             login: '',
-            token: localStorage.getItem('TOKEN'),
-            login: localStorage.getItem('LOGIN')
+            // token: localStorage.getItem('TOKEN'),
+            // login: localStorage.getItem('LOGIN')
         }
         this.handleChange = this.handleChange.bind(this)
         this.handleButton = this.handleButton.bind(this)
-        this.handleSubmit = this.handleSubmit.bind(this)
+        this.adicionaTweet = this.adicionaTweet.bind(this)
 
     }
 
     componentWillMount() {
         // window.store.subscribe(() => {
         this.context.store.subscribe(() => {
+            
             this.setState({
                 tweets: this.context.store.getState()
             })
@@ -45,29 +47,7 @@ class Home extends Component {
     }
 
     componentDidMount() {
-        fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`)
-            .then((resposta) => resposta.json())
-            .then((tweetsExistentes) => {
-
-                this.context.store.dispatch({
-                    type: 'CARREGA_TWEETS',
-                    tweets: tweetsExistentes
-                })
-
-                // this.setState({
-                //     tweets: tweetsExistentes,
-                //     // login: localStorage.getItem('LOGIN')
-                // })
-            })
-
-        // fetch(`http://localhost:3001/usuarios/omariosouto`)
-        //     .then((resposta) => resposta.json())
-        //     .then((usuarios) => {
-
-        //         this.setState({
-        //             // login: localStorage.getItem('LOGIN')
-        //         })
-        //     })
+        this.context.store.dispatch(TweetsAPI.carregaTweet())
     }
 
     handleChange(event) {
@@ -82,59 +62,27 @@ class Home extends Component {
         }
     }
 
-    handleSubmit(event) {
+    adicionaTweet(event) {
         event.preventDefault()
 
         const novoTweet = this.state.novoTweet
-        const tweetsVelhos = this.state.tweets
 
+        this.context.store.dispatch(TweetsAPI.addTweet(novoTweet))
 
-        if (novoTweet) {
-            fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`, {
-                method: 'POST',
-                body: JSON.stringify({ conteudo: novoTweet })
-            })
-                .then((resposta) => {
-                    if (!resposta.ok) {
-                        throw resposta
-                    }
-                    return resposta.json()
-                })
-                .then((tweetServer) => {
-                    
-                    this.setState({
-                        tweets: [tweetServer, ...tweetsVelhos]
-                    })
-                })
-                .catch((erro) => {
-                    erro.json().then((response) => {
-
-                        this.setState({
-                            error: "Não encontrou tweets"
-                        })
-                    })
-                })
-        }
+        this.setState({
+            novoTweet: ''
+        })
 
     }
 
     removeTweet = (idTweet) => {
 
-        fetch(`http://localhost:3001/tweets/${idTweet}?X-AUTH-TOKEN=${localStorage.getItem('TOKEN')}`, {
-            method: 'DELETE'
+        this.context.store.dispatch(TweetsAPI.removeTweet(idTweet))
+
+        this.setState({
+            // tweets: tweetsAtualizados,
+            tweetAtivo: {}
         })
-            .then(respostaServer => respostaServer.json())
-            .then(respostaPronta => {
-                const tweetsAtualizados = this.state.tweets.filter(tweetAtual => {
-                    return tweetAtual._id !== idTweet
-                })
-
-                this.setState({
-                    tweets: tweetsAtualizados,
-                    tweetAtivo: {}
-                })
-            })
-
     }
 
     abreModal = (idTweetModal, event) => {
@@ -146,11 +94,11 @@ class Home extends Component {
 
                 return tweetAtual._id === idTweetModal
             })
-    
+
             this.setState({
                 tweetAtivo: tweetAtivo
             })
-        }        
+        }
     }
 
     fechaModal = (event) => {
@@ -173,7 +121,7 @@ class Home extends Component {
                 <div className="container">
                     <Dashboard>
                         <Widget>
-                            <form className="novoTweet" onSubmit={this.handleSubmit}>
+                            <form className="novoTweet" onSubmit={this.adicionaTweet}>
                                 <div className="novoTweet__editorArea">
                                     <span
                                         className={`novoTweet__status ${
@@ -212,9 +160,9 @@ class Home extends Component {
                                 }
 
                                 {this.state.tweets.length && this.state.tweets.map((tweet, index) => {
+
                                     return <Tweet
                                         key={tweet._id}
-                                        removeHandler={() => this.removeTweet(tweet._id)}
                                         handleModal={(event) => this.abreModal(tweet._id, event)}
                                         texto={tweet.conteudo}
                                         tweetInfo={tweet} />
@@ -231,7 +179,7 @@ class Home extends Component {
                     </Dashboard>
                 </div>
 
-                <Modal 
+                <Modal
                     isAberto={this.state.tweetAtivo._id}
                     fechaModal={this.fechaModal}>
                     <Widget>
@@ -252,3 +200,57 @@ class Home extends Component {
 // }
 
 export default Home;
+
+
+// fetch(`http://localhost:3001/usuarios/omariosouto`)
+//     .then((resposta) => resposta.json())
+//     .then((usuarios) => {
+
+//         this.setState({
+//             // login: localStorage.getItem('LOGIN')
+//         })
+//     })
+
+
+
+// handleSubmit(event) {
+//     event.preventDefault()
+
+//     const novoTweet = this.state.novoTweet
+//     // const tweetsVelhos = this.state.tweets
+
+//     if (novoTweet) {
+//         fetch(`http://localhost:3001/tweets?X-AUTH-TOKEN=${this.state.token}`, {
+//             method: 'POST',
+//             body: JSON.stringify({ conteudo: novoTweet })
+//         })
+//             .then((resposta) => {
+//                 if (!resposta.ok) {
+//                     throw resposta
+//                 }
+//                 return resposta.json()
+//             })
+//             .then((tweetServer) => {
+//                 this.context.store.dispatch({ 
+//                     type: 'ADD_TWEET',
+//                     tweets: tweetServer
+//                 })
+//                 this.setState({
+//                     novoTweet: ''
+//                 })
+//                 // this.setState({
+//                 //     tweets: [tweetServer, ...tweetsVelhos]
+//                 // })
+//             })
+//             .catch((erro) => {
+//                 erro.json().then((response) => {
+
+//                     this.setState({
+//                         error: "Não encontrou tweets"
+//                     })
+//                 })
+//             })
+//     }
+
+// }
+

@@ -63,9 +63,20 @@ export const removeTweet = (idTweet) => {
 
 export const like = (idTweet) => {
     return (dispatch) => {
+        // tem q add o Fetch
         dispatch({
             type: 'LIKE',
             idTweet
         })
+        dispatch({
+            type: 'ADD_NOTIFICACAO',
+            msg: 'Oeeeeeeeeeeeee ce deu likeeeeeeeeeeeeeeeeee'
+        })
+        /* setTimeout(() => {
+            dispatch({
+                type: 'REMOVE_NOTIFICACAO'
+            })
+        } ,5000 ) */
+        
     }
 }

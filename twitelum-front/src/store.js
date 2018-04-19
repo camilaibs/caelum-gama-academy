@@ -1,5 +1,5 @@
 import thunk from 'redux-thunk'
-import { createStore, applyMiddleware } from 'redux'
+import { createStore, applyMiddleware, combineReducers } from 'redux'
 
 
 function tweetsReducer( estado = { lista: [], tweetAtivo: {} }, acao ) {
@@ -22,7 +22,7 @@ function tweetsReducer( estado = { lista: [], tweetAtivo: {} }, acao ) {
     }
 
     if (acao.type === 'REMOVE_TWEET') {
-        console.warn('acao', acao)
+        // console.warn('acao', acao)
         const listaTweets = estado.lista.filter(tweetAtual => {
             return tweetAtual._id !== acao.idTweet
         })
@@ -81,8 +81,26 @@ function tweetsReducer( estado = { lista: [], tweetAtivo: {} }, acao ) {
     return estado
 }
 
+function notificacaoReducer( estado= '', acao = {} ) {
+
+    if (acao.type === 'ADD_NOTIFICACAO') {
+
+        const novoEstado = acao.msg
+        return novoEstado
+    }
+
+    if (acao.type === 'REMOVE_NOTIFICACAO') {
+        return ''
+    }
+
+    return estado
+}
+
 const store = createStore(
-    tweetsReducer,
+    combineReducers({
+        tweets: tweetsReducer,
+        notificacao: notificacaoReducer
+    }),
     applyMiddleware(thunk)
 )
 

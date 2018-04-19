@@ -82,7 +82,7 @@ Tweet.propTypes = {
     texto: PropTypes.string.isRequired,
     tweetInfo: PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        likeado: PropTypes.bool.isRequired,
+        likeado: PropTypes.bool,
         totalLikes: PropTypes.number.isRequired,
         removivel: PropTypes.bool,
         usuario: PropTypes.shape({

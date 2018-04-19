@@ -39,10 +39,10 @@ class Home extends Component {
     componentWillMount() {
         // window.store.subscribe(() => {
         this.context.store.subscribe(() => {
-            
+
             this.setState({
-                tweets: this.context.store.getState().lista,
-                tweetAtivo: this.context.store.getState().tweetAtivo
+                tweets: this.context.store.getState().tweets.lista,
+                tweetAtivo: this.context.store.getState().tweets.tweetAtivo
             })
         })
     }
@@ -92,7 +92,7 @@ class Home extends Component {
 
         if (!ignoraModal) {
 
-            this.context.store.dispatch({ 
+            this.context.store.dispatch({
                 type: 'ADD_TWEET_ATIVO', idTweetModal
             })
 
@@ -193,6 +193,15 @@ class Home extends Component {
                             tweetInfo={this.state.tweetAtivo} />
                     </Widget>
                 </Modal>
+
+                {this.context.store.getState().notificacao &&
+
+                    <div
+                        className='notificacaoMsg'
+                        onAnimationEnd={() => this.context.store.dispatch({ type: 'REMOVE_NOTIFICACAO' })}>
+                        {this.context.store.getState().notificacao}
+                    </div>
+                }
 
             </Fragment>
         );

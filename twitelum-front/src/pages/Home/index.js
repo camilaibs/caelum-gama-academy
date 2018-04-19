@@ -41,7 +41,8 @@ class Home extends Component {
         this.context.store.subscribe(() => {
             
             this.setState({
-                tweets: this.context.store.getState()
+                tweets: this.context.store.getState().lista,
+                tweetAtivo: this.context.store.getState().tweetAtivo
             })
         })
     }
@@ -90,14 +91,14 @@ class Home extends Component {
         const ignoraModal = event.target.closest('.ignoraModal')
 
         if (!ignoraModal) {
-            const tweetAtivo = this.state.tweets.find((tweetAtual) => {
 
-                return tweetAtual._id === idTweetModal
+            this.context.store.dispatch({ 
+                type: 'ADD_TWEET_ATIVO', idTweetModal
             })
 
-            this.setState({
-                tweetAtivo: tweetAtivo
-            })
+            // this.setState({
+            //     tweetAtivo: tweetAtivo
+            // })
         }
     }
 
@@ -105,9 +106,12 @@ class Home extends Component {
         const isModal = event.target.classList.contains('modal')
 
         if (isModal) {
-            this.setState({
-                tweetAtivo: {}
+            this.context.store.dispatch({
+                type: 'REMOVE_TWEET_ATIVO'
             })
+            // this.setState({
+            //     tweetAtivo: {}
+            // })
         }
     }
 

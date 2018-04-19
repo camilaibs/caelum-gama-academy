@@ -46,6 +46,9 @@ export const removeTweet = (idTweet) => {
                     type:'REMOVE_TWEET',
                     idTweet: idTweet
                 })
+                dispatch({
+                    type:'REMOVE_TWEET_ATIVO'
+                })
                 // const tweetsAtualizados = this.state.tweets.filter(tweetAtual => {
                 //     return tweetAtual._id !== idTweet
                 // })
@@ -58,3 +61,11 @@ export const removeTweet = (idTweet) => {
     }
 }
 
+export const like = (idTweet) => {
+    return (dispatch) => {
+        dispatch({
+            type: 'LIKE',
+            idTweet
+        })
+    }
+}

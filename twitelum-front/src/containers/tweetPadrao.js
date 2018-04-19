@@ -7,6 +7,9 @@ const mapDispatchToProps = (dispatch, props) => {
     return {
         removeHandler: () => {
             dispatch(TweetsAPI.removeTweet(props.tweetInfo._id))
+        },
+        handleLike: () => {
+            dispatch(TweetsAPI.like( props.tweetInfo._id))
         }
     }
 }
